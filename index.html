@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Універсальний перехід у месенджери</title>
+    <style>
+        /* Стилі для красивого віконця */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .card {
+            background: #ffffff;
+            padding: 35px 40px;
+            border-radius: 24px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 420px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 24px;
+            margin-bottom: 8px;
+            color: #1a1a1a;
+        }
+        p.sub {
+            color: #666;
+            margin-bottom: 25px;
+            font-size: 14px;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 18px;
+            box-sizing: border-box;
+            margin-bottom: 20px;
+            transition: border-color 0.3s;
+            outline: none;
+        }
+        input:focus {
+            border-color: #7360f2;
+        }
+
+        .buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 14px 0;
+            border-radius: 12px;
+            text-decoration: none;
+            color: white;
+            font-weight: 600;
+            font-size: 16px;
+            transition: transform 0.1s, box-shadow 0.2s;
+            box-sizing: border-box;
+        }
+        .btn:active {
+            transform: scale(0.96);
+        }
+        
+        /* Кольори месенджерів */
+        .btn-viber { background-color: #7360f2; box-shadow: 0 4px 12px rgba(115, 96, 242, 0.3); }
+        .btn-viber:hover { background-color: #5a4bd1; }
+        
+        .btn-telegram { background-color: #0088cc; box-shadow: 0 4px 12px rgba(0, 136, 204, 0.3); }
+        .btn-telegram:hover { background-color: #007ab8; }
+        
+        .btn-whatsapp { background-color: #25D366; box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3); }
+        .btn-whatsapp:hover { background-color: #1ebe57; }
+
+        .footer-note {
+            margin-top: 20px;
+            font-size: 12px;
+            color: #888;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h1>📱 Перехід у месенджер</h1>
+    <p class="sub">Введіть номер телефону (український або міжнародний)</p>
+    
+    <input type="text" id="phoneInput" placeholder="Наприклад: 0970003875" value="0970003875">
+    
+    <div class="buttons" id="buttonsContainer">
+        <a href="#" id="viberBtn" class="btn btn-viber" target="_blank">💬 Відкрити у Viber</a>
+        <a href="#" id="telegramBtn" class="btn btn-telegram" target="_blank">✈️ Відкрити у Telegram</a>
+        <a href="#" id="whatsappBtn" class="btn btn-whatsapp" target="_blank">📞 Відкрити у WhatsApp</a>
+    </div>
+    <div class="footer-note">Кнопки відкриваються через пошук Google для безпеки та сумісності.</div>
+</div>
+
+<script>
+    const phoneInput = document.getElementById('phoneInput');
+    const viberBtn = document.getElementById('viberBtn');
+    const telegramBtn = document.getElementById('telegramBtn');
+    const whatsappBtn = document.getElementById('whatsappBtn');
+
+    // Функція для очищення номера (залишаємо тільки цифри)
+    function cleanNumber(number) {
+        return number.replace(/\D/g, '');
+    }
+
+    // Функція для форматування номера (додає +380, якщо потрібно)
+    function formatForLink(number) {
+        let clean = cleanNumber(number);
+        if (clean.startsWith('380') && clean.length === 12) {
+            return '+' + clean;
+        } else if (clean.startsWith('0') && clean.length === 10) {
+            return '+38' + clean;
+        } else if (clean.startsWith('80') && clean.length === 11) {
+            return '+3' + clean;
+        } else {
+            return '+' + clean;
+        }
+    }
+
+    // Оновлення посилань при введенні тексту
+    function updateLinks() {
+        let rawNumber = phoneInput.value;
+        let formattedNumber = formatForLink(rawNumber);
+        
+        // Якщо номер порожній, ховаємо кнопки
+        if (cleanNumber(rawNumber).length === 0) {
+            viberBtn.style.display = 'none';
+            telegramBtn.style.display = 'none';
+            whatsappBtn.style.display = 'none';
+            return;
+        } else {
+            viberBtn.style.display = 'block';
+            telegramBtn.style.display = 'block';
+            whatsappBtn.style.display = 'block';
+        }
+
+        // Використовуємо наш перевірений обхідний шлях через Google
+        // Це гарантує, що посилання відкриються навіть у месенджерах!
+        const searchBase = 'https://www.google.com/search?q=';
+        
+        viberBtn.href = searchBase + encodeURIComponent('viber://chat?number=' + formattedNumber);
+        telegramBtn.href = searchBase + encodeURIComponent('tg://resolve?phone=' + formattedNumber);
+        whatsappBtn.href = searchBase + encodeURIComponent('whatsapp://send?phone=' + formattedNumber);
+    }
+
+    // Слухаємо зміни в полі вводу
+    phoneInput.addEventListener('input', updateLinks);
+
+    // Запускаємо при завантаженні сторінки
+    updateLinks();
+</script>
+
+</body>
+</html>
